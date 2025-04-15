@@ -1,6 +1,7 @@
 package org.gestern.gringotts.commands;
 
 import com.google.common.collect.Lists;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -171,19 +172,8 @@ public abstract class GringottsAbstractExecutor implements TabExecutor {
     }
 
     void sendBalanceMessage(Account account) {
-        account.message(Language.LANG.balance.replace(TAG_BALANCE, eco.currency().format(account.balance())));
 
-        if (Configuration.CONF.balanceShowVault) {
-            account.message(Language.LANG.vault_balance.replace(TAG_BALANCE, eco.currency().format(account.vaultBalance())));
-        }
-
-        if (Configuration.CONF.balanceShowInventory) {
-            account.message(Language.LANG.inv_balance.replace(TAG_BALANCE, eco.currency().format(account.invBalance())));
-        }
-
-        if (Configuration.CONF.balanceShowEnderchest && account.hasPermission(Permissions.USE_VAULT_ENDERCHEST.node)) {
-            account.message(Language.LANG.end_balance.replace(TAG_BALANCE, eco.currency().format(account.endBalance())));
-        }
+        account.message(ChatColor.GREEN + "Your current balance is " + ChatColor.GOLD + eco.currency().format(account.balance()));
     }
 
     public List<String> suggestAccounts(String arg) {

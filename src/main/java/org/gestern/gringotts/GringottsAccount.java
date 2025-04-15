@@ -1,5 +1,6 @@
 package org.gestern.gringotts;
 
+import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -45,24 +46,25 @@ public class GringottsAccount {
      * @param callMe function to call
      * @return will be completed after function is called
      */
-    private static <V> CompletableFuture<V> callSync(Callable<V> callMe) {
-        final CompletableFuture<V> f = new CompletableFuture<>();
+    public static <V> CompletableFuture<V> callSync(Callable<V> callMe) {
+        final CompletableFuture<V> future = new CompletableFuture<>();
 
         Runnable runMe = () -> {
             try {
-                f.complete(callMe.call());
+                future.complete(callMe.call());
             } catch (Exception e) {
-                f.completeExceptionally(e);
+                future.completeExceptionally(e);
             }
         };
 
         if (Bukkit.isPrimaryThread()) {
             runMe.run();
         } else {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Gringotts.instance, runMe);
+            GlobalRegionScheduler scheduler = Bukkit.getGlobalRegionScheduler();
+            scheduler.execute(Gringotts.instance, runMe); // Schedules on the main thread safely
         }
 
-        return f;
+        return future;
     }
 
     /**

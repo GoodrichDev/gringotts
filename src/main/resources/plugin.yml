@@ -9,6 +9,7 @@ database: true
 
 api-version: "1.20"
 api: "1.20"
+folia-supported: true
 
 softdepend: [ PlaceholderAPI ]
 loadbefore: [ Vault ]
@@ -17,11 +18,6 @@ libraries:
   - io.ebean:ebean-sqlite:15.4.0
 
 commands:
-  vault:
-    description: Accessing your vault commands
-    usage: /vault
-    aliases: [ v ]
-    permission: gringotts.command.vault
   balance:
     description: Shows your vault balance
     usage: /balance

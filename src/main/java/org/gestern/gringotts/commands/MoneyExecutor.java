@@ -1,6 +1,7 @@
 package org.gestern.gringotts.commands;
 
 import com.google.common.collect.Lists;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
  * Player commands.
  */
 public class MoneyExecutor extends GringottsAbstractExecutor {
-    private static final List<String> commands = Arrays.asList("", "withdraw", "deposit", "send");
+    private static final List<String> commands = Arrays.asList("");
 
     /**
      * Executes the given command, returning its success.
@@ -47,59 +48,9 @@ public class MoneyExecutor extends GringottsAbstractExecutor {
             return true;
         }
 
-        if (args.length < 2) return false;
-
-        String command = args[0];
-
-        switch (command.toLowerCase()) {
-            case "withdraw": {
-                try {
-                    double value = Double.parseDouble(args[1]);
-
-                    withdraw(player, value);
-
-                    return true;
-                } catch (NumberFormatException ignored) {
-                    player.sendMessage(Language.LANG.invalid_number.replace("%value", args[1]));
-                    return true;
-                }
-            }
-            case "deposit": {
-                try {
-                    double value = Double.parseDouble(args[1]);
-
-                    deposit(player, value);
-
-                    return true;
-                } catch (NumberFormatException ignored) {
-                    player.sendMessage(Language.LANG.invalid_number.replace("%value", args[1]));
-                    return true;
-                }
-            }
-            case "send": {
-                if (args.length < 3) return false;
-                try {
-                    double value = Double.parseDouble(args[2]);
-
-                    // money send <player> <amount>
-                    return pay(player, value, args[1]);
-                } catch (NumberFormatException ignored) {
-                    player.sendMessage(Language.LANG.invalid_number.replace("%value", args[2]));
-                    return true;
-                }
-            }
-            case "pay": {
-                if (args.length < 3) return false;
-                try {
-                    double value = Double.parseDouble(args[1]);
-
-                    // money pay <amount> <player>
-                    return pay(player, value, args[2]);
-                } catch (NumberFormatException ignored) {
-                    player.sendMessage(Language.LANG.invalid_number.replace("%value", args[1]));
-                    return true;
-                }
-            }
+        if (args.length < 2) {
+            player.sendMessage(ChatColor.GREEN + "You can only use /money");
+            return true;
         }
 
         return false;
@@ -125,24 +76,10 @@ public class MoneyExecutor extends GringottsAbstractExecutor {
                                       String[] args) {
         String cmd = args[0].toLowerCase();
 
-        switch (args.length) {
-            case 1: {
-                return commands.stream()
-                        .filter(com -> startsWithIgnoreCase(com, args[0]))
-                        .collect(Collectors.toList());
-            }
-            case 2: {
-                if ("send".equals(cmd)) {
-                    return suggestAccounts(args[1]);
-                }
-                break;
-            }
-            case 3: {
-                if ("pay".equals(cmd)) {
-                    return suggestAccounts(args[2]);
-                }
-                break;
-            }
+        if (args.length == 1) {
+            return commands.stream()
+                    .filter(com -> startsWithIgnoreCase(com, args[0]))
+                    .collect(Collectors.toList());
         }
 
         return Lists.newArrayList();

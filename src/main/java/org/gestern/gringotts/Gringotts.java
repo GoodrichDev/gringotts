@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
@@ -22,7 +25,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.gestern.gringotts.accountholder.AccountHolderFactory;
 import org.gestern.gringotts.accountholder.AccountHolderProvider;
 import org.gestern.gringotts.api.Eco;
@@ -70,6 +72,8 @@ public class Gringotts extends JavaPlugin {
     private DAO dao;
     private Eco eco;
 
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
     /**
      * Instantiates a new Gringotts.
      */
@@ -113,14 +117,11 @@ public class Gringotts extends JavaPlugin {
             // just call DAO once to ensure it's loaded before startup is complete
             dao = getDAO();
 
-            new BukkitRunnable() {
-                // Run once worlds are loaded
-                @Override
-                public void run() {
-                    dao.retrieveChests();
-                    pendingOperationManager.init();
-                }
-            }.runTask(instance);
+            scheduler.schedule(() -> {
+                dao.retrieveChests();
+                pendingOperationManager.init();
+            }, 0, TimeUnit.SECONDS);
+
 
             // load and init configuration
             saveDefaultConfig(); // saves default configuration if no config.yml exists yet
@@ -300,7 +301,6 @@ public class Gringotts extends JavaPlugin {
     }
 
     private void registerCommands() {
-        registerCommand("vault", new VaultCommand());
         registerCommand(new String[]{"balance", "money"}, new MoneyExecutor());
         registerCommand("moneyadmin", new MoneyAdminExecutor());
         registerCommand("gringotts", new GringottsExecutor(this));
